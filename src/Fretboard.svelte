@@ -2,6 +2,9 @@
 	export let config;
 
 	import { nMap } from "./core/compute";
+	import { createEventDispatcher } from "svelte";
+
+	const dispatch = createEventDispatcher();
 
 	let notes = [];
 	const stringPaddings = [180, 150, 120, 90, 60, 30];
@@ -48,6 +51,8 @@
 		if (selectedNotes.includes(note)) {
 			selectedNotes = cleanNotes;
 			noteEl.classList.remove("selected");
+
+			dispatchNoteClicked({...note, add: false});
 		} else {
 			const oldStringNote = selectedNotes.find(sNote => sNote.string === note.string);
 
@@ -57,7 +62,13 @@
 
 			selectedNotes = [note, ...cleanNotes];
 			noteEl.classList.add("selected");
+
+			dispatchNoteClicked({...note, add: true});
 		}
+	}
+
+	function dispatchNoteClicked(note) {
+		dispatch("noteclicked", note)
 	}
 
 	function update(config) {

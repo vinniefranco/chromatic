@@ -4,8 +4,9 @@
 	let config;
 	let selectedMode;
 
-	import { push, replace } from "svelte-spa-router";
+	import { location, push, querystring, replace } from "svelte-spa-router";
 
+	import Chords from "../Chords.svelte";
 	import ScaleSelector from "../ScaleSelector.svelte";
 	import TuningSelector from "../TuningSelector.svelte";
 	import Fretboard from "../Fretboard.svelte";
@@ -37,7 +38,24 @@
 		config = compute(newTuning, selectedMode);
 	}
 
+	function handleNoteClick({detail: {add, degree, key, string}}) {
+		const searchParams = new URLSearchParams($querystring);
+		const chord = searchParams.get("a") || "";
+		const notes = new Set(chord.split("-"));
+		const noteBit = (key ^ (string << 5) ^ (degree << 8)).toString(32);
+
+		if (add) {
+			notes.add(noteBit);
+		} else {
+			notes.delete(noteBit);
+		}
+
+		searchParams.set("a", [...notes].join("-"));
+
+		push($location + `?${searchParams.toString()}`)
+	}
 </script>
+
 <TabNav {params} selected="scale"/>
 <ScaleSelector
 	onChangeMode={handleModeChange}
@@ -47,4 +65,5 @@
 	onChangeTuning={changeTuning}
 	currentTuning={config.tuning} 
 	notes={SHARP_NOTES} />
-<Fretboard {config} />
+<Fretboard {config} on:noteclicked={handleNoteClick} />
+<Chords scale={config.availableNotes} />

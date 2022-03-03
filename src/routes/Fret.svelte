@@ -25,6 +25,7 @@
 
 	}
 
+
 </script>
 <TabNav {params} selected="fret"/>
 <TuningSelector
